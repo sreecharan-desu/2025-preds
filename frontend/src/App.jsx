@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Calendar } from 'lucide-react';
 
-const BACKEND_URL = 'http://localhost:3000';
+const BACKEND_URL = 'https://2025-preds-api.vercel.app/';
 
 const FortuneTeller = () => {
   const [name, setName] = useState('');
