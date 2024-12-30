@@ -3,6 +3,7 @@ const cors = require('cors');
 const app = express();
 app.use(express.json());
 app.use(cors());
+const {Data} = require('./db/db');
 
 app.get('/', (req, res) => {
     res.send("Hello from backend");
@@ -12,10 +13,12 @@ app.post("/post", async(req,res)=>{
 
     const {data,name} = req.body;
 
-    await Data.create({
+    const record = await Data.create({
         data : data,
         name : name
     })
+
+    console.log(record._id);
 
     res.json({
         msg : "recorded successfully...",

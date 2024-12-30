@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Calendar } from 'lucide-react';
 
-const BACKEND_URL = 'https://2025-preds-api.vercel.app/';
+const BACKEND_URL = 'https://2025-preds-api.vercel.app';
+// const BACKEND_URL = 'http://localhost:5000';
+
 
 const FortuneTeller = () => {
   const [name, setName] = useState('');
@@ -212,33 +214,70 @@ const FortuneTeller = () => {
       alert('Please enter your name and birthdate');
       return;
     }
-
-    setLoading(true);
-    
-    const nameSum = name.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
-    const dateSum = new Date(birthdate).getTime();
-    const seed = nameSum + dateSum;
-
-    const generatedFortune = {
-      career: predictions.career[Math.abs(seed) % predictions.career.length],
-      personal: predictions.personal[Math.abs(seed + 1) % predictions.personal.length],
-      relationships: predictions.relationships[Math.abs(seed + 2) % predictions.relationships.length],
-      growth: predictions.growth[Math.abs(seed + 3) % predictions.growth.length]
-    };
-
-    await fetch(`${BACKEND_URL}post`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        name: name,
-        data: generatedFortune  // Send it as an object, not a stringified JSON
-      })
-    });
-    
-
+  
+    // Get the list of previously entered names from localStorage, or initialize it as an empty array
+    let nameList = JSON.parse(localStorage.getItem("nameList")) || [];
+  
+    // Only proceed if the name is not already in the list
+    if (!nameList.includes(name)) {
+      nameList.push(name); // Add the new name to the list
+      localStorage.setItem("nameList", JSON.stringify(nameList)); // Save the updated list back to localStorage
+  
+      setLoading(true);
+  
+      const normalizedName = name.toLowerCase(); // Normalize name for consistency
+      const nameSum = normalizedName.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+      const birthdateObj = new Date(birthdate);
+  
+      if (isNaN(birthdateObj)) {
+        alert('Please enter a valid birthdate');
+        return;
+      }
+  
+      const dateSum = birthdateObj.getTime();
+      const seed = nameSum + dateSum;
+  
+      const generatedFortune = {
+        career: predictions.career[Math.abs(seed) % predictions.career.length],
+        personal: predictions.personal[Math.abs(seed + 1) % predictions.personal.length],
+        relationships: predictions.relationships[Math.abs(seed + 2) % predictions.relationships.length],
+        growth: predictions.growth[Math.abs(seed + 3) % predictions.growth.length]
+      };
+  
+      try {
+        const response = await fetch(`${BACKEND_URL}/post`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: name,
+            data: JSON.stringify(generatedFortune)
+          })
+        });
+  
+        if (!response.ok) {
+          throw new Error('Failed to connect to the server');
+        }
+  
+        const data = await response.json();
+  
+        if (data.success) {
+          setFortune(generatedFortune);
+        } else {
+          alert('Failed to generate prediction. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to generate prediction. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // alert('This name has already been entered. No backend request made.');
+    }
   };
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50 p-4 flex flex-col">
@@ -246,43 +285,53 @@ const FortuneTeller = () => {
         <h1 className="text-2xl md:text-3xl font-bold text-center text-blue-900 mb-6 md:mb-8">
           Your 2025 Prediction
         </h1>
-
-        <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 space-y-4 md:space-y-6">
-          <div className="space-y-4">
+  
+        <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 space-y-6 md:space-y-8">
+          <div className="space-y-6">
+            {/* Name Input */}
             <div>
               <input
                 type="text"
-                className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ease-in-out"
                 placeholder="Your Name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
-
+  
+            {/* Date Input with Calendar Icon */}
             <div className="relative">
               <input
                 type="date"
-                className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ease-in-out"
                 value={birthdate}
                 onChange={(e) => setBirthdate(e.target.value)}
               />
-              <Calendar className="absolute right-3 top-2 md:top-3 text-gray-400" />
             </div>
-
+  
+            {/* Reveal Fortune Button */}
             <button
               onClick={generateFortune}
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 md:py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-400"
+              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-400 flex justify-center items-center space-x-2"
             >
-              {loading ? 'Generating...' : 'Reveal Your Fortune'}
+              {loading ? (
+                <>
+                  <span className="animate-spin">🔄</span> <span>Generating...</span>
+                </>
+              ) : (
+                'Reveal Your Fortune'
+              )}
             </button>
           </div>
-
+  
+          {/* Display the Fortune */}
           {fortune && (
-            <div className="mt-6 md:mt-8 space-y-4 md:space-y-6">
+            <div className="mt-8 space-y-6">
               <div>
-                <h2 className="text-lg md:text-xl font-semibold text-blue-900 mb-4">Your 2025 Forecast</h2>
-                
+                <h2 className="text-lg md:text-xl font-semibold text-blue-900 mb-4">
+                  Your 2025 Forecast
+                </h2>
                 <div className="space-y-4">
                   {Object.entries(fortune).map(([category, prediction]) => (
                     <div key={category}>
@@ -294,7 +343,7 @@ const FortuneTeller = () => {
                   ))}
                 </div>
               </div>
-
+  
               <p className="text-sm text-center text-gray-500">
                 Prediction for {name} | Generated on {new Date().toLocaleDateString()}
               </p>
@@ -302,11 +351,13 @@ const FortuneTeller = () => {
           )}
         </div>
       </div>
-      
+  
+      {/* Footer */}
       <footer className="text-center py-4 text-sm text-gray-600">
-        Made with ❤️ by <a 
-          href="https://github.com/sreecharan-desu" 
-          target="_blank" 
+        Made with ❤️ by{' '}
+        <a
+          href="https://github.com/sreecharan-desu"
+          target="_blank"
           rel="noopener noreferrer"
           className="text-blue-600 hover:text-blue-800 transition-colors"
         >
@@ -315,6 +366,7 @@ const FortuneTeller = () => {
       </footer>
     </div>
   );
+  
 };
 
 export default FortuneTeller;
