@@ -361,7 +361,7 @@ const FortuneTeller = () => {
           rel="noopener noreferrer"
           className="text-blue-600 hover:text-blue-800 transition-colors"
         >
-          Sree Charan
+          Your Sree Charan
         </a>
       </footer>
     </div>
