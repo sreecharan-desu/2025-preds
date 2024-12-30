@@ -1,42 +1,38 @@
-import express from "express";
-import cors from "cors";
-import mongoose from "mongoose";
-
-//Mongoose schema 
-console.log("connecting to Database . . .");
-await mongoose.connect('mongodb+srv://srecharandesu:charan%402006@cluster0.a9berin.mongodb.net/2025-Preds');
-console.log("Connected to Database.");
-
-
-const DataSchema = new mongoose.Schema({
-    name : String,
-    data : Object
-})
-
-const Data = mongoose.model("Data",DataSchema);
-
+const express = require('express');
+const cors = require('cors');
 const app = express();
-app.use(cors());
 app.use(express.json());
+app.use(cors());
 
-app.get('/',(req,res)=>{
-    res.send("Hello from backend.")
-})
+app.get('/', (req, res) => {
+    res.send("Hello from backend");
+});
 
-app.post('/post',async(req,res)=>{
-    const {name,data} = req.body;
-    // console.log()
+app.post("/post", async(req,res)=>{
+
+    const {data,name} = req.body;
+
     await Data.create({
-        name : name,
-        data : data
+        data : data,
+        name : name
     })
 
     res.json({
-        msg : "Successfully recorded.",success : true
+        msg : "recorded successfully...",
+        success : true
     })
 
-})
 
-app.listen(3000,(req,res)=>{
-    console.log("Listening on port 3000 . . .");
 });
+
+async function startServer() {
+    try {
+        app.listen(5000, () => {
+            console.log("Listening on port 5000....");
+        });
+    } catch (error) {
+        console.error("Error deleting records:", error);
+    }
+}
+
+startServer();
