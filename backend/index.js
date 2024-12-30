@@ -19,6 +19,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get('/',(req,res)=>{
+    res.send("Hello from backend.")
+})
+
 app.post('/post',async(req,res)=>{
     const {name,data} = req.body;
     // console.log()
