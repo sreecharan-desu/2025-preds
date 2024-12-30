@@ -227,7 +227,7 @@ const FortuneTeller = () => {
     };
 
     try {
-      const response = await fetch(`${BACKEND_URL}/post`, {
+      const response = await fetch(`${BACKEND_URL}post`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
