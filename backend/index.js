@@ -28,7 +28,7 @@ app.post('/post',async(req,res)=>{
     // console.log()
     await Data.create({
         name : name,
-        data : JSON.parse(data)
+        data : data
     })
 
     res.json({

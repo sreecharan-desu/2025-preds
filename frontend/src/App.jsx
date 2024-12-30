@@ -226,31 +226,18 @@ const FortuneTeller = () => {
       growth: predictions.growth[Math.abs(seed + 3) % predictions.growth.length]
     };
 
-    try {
-      const response = await fetch(`${BACKEND_URL}post`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: name,
-          data: JSON.stringify(generatedFortune)
-        })
-      });
+    await fetch(`${BACKEND_URL}post`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: name,
+        data: generatedFortune  // Send it as an object, not a stringified JSON
+      })
+    });
+    
 
-      const data = await response.json();
-      
-      if (data.success) {
-        setFortune(generatedFortune);
-      } else {
-        alert('Failed to save prediction. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Failed to generate prediction. Please try again.');
-    } finally {
-      setLoading(false);
-    }
   };
 
   return (
