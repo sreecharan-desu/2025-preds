@@ -300,14 +300,18 @@ const FortuneTeller = () => {
             </div>
   
             {/* Date Input with Calendar Icon */}
-            <div className="relative">
+            <div className="relative flex flex-col space-y-2">
+              <label className="text-gray-700 font-medium">
+                Date of Birth:
+              </label>
               <input
                 type="date"
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ease-in-out"
+                className="w-full p-3 border border-gray-300 rounded-lg shadow-sm bg-white focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200 ease-in-out hover:shadow-md hover:border-blue-300 text-gray-600"
                 value={birthdate}
                 onChange={(e) => setBirthdate(e.target.value)}
               />
             </div>
+
   
             {/* Reveal Fortune Button */}
             <button
